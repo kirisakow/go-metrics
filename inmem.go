@@ -171,6 +171,19 @@ func (i *InmemSink) SetGaugeWithLabels(key []string, val float32, labels []Label
 
 	intv.Lock()
 	defer intv.Unlock()
+	intv.Gauges[k] = GaugeValue{Name: name, Value: float64(val), Labels: labels}
+}
+
+func (i *InmemSink) SetGaugeFloat64(key []string, val float64) {
+	i.SetGaugeFloat64WithLabels(key, val, nil)
+}
+
+func (i *InmemSink) SetGaugeFloat64WithLabels(key []string, val float64, labels []Label) {
+	k, name := i.flattenKeyLabels(key, labels)
+	intv := i.getInterval()
+
+	intv.Lock()
+	defer intv.Unlock()
 	intv.Gauges[k] = GaugeValue{Name: name, Value: val, Labels: labels}
 }
 

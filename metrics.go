@@ -42,6 +42,35 @@ func (m *Metrics) SetGaugeWithLabels(key []string, val float32, labels []Label) 
 	m.sink.SetGaugeWithLabels(key, val, labelsFiltered)
 }
 
+func (m *Metrics) SetGaugeFloat64(key []string, val float64) {
+	m.SetGaugeFloat64WithLabels(key, val, nil)
+}
+
+func (m *Metrics) SetGaugeFloat64WithLabels(key []string, val float64, labels []Label) {
+	if m.HostName != "" {
+		if m.EnableHostnameLabel {
+			labels = append(labels, Label{"host", m.HostName})
+		} else if m.EnableHostname {
+			key = insert(0, m.HostName, key)
+		}
+	}
+	if m.EnableTypePrefix {
+		key = insert(0, "gauge", key)
+	}
+	if m.ServiceName != "" {
+		if m.EnableServiceLabel {
+			labels = append(labels, Label{"service", m.ServiceName})
+		} else {
+			key = insert(0, m.ServiceName, key)
+		}
+	}
+	allowed, labelsFiltered := m.allowMetric(key, labels)
+	if !allowed {
+		return
+	}
+	m.sink.SetGaugeFloat64WithLabels(key, val, labelsFiltered)
+}
+
 func (m *Metrics) EmitKey(key []string, val float32) {
 	if m.EnableTypePrefix {
 		key = insert(0, "kv", key)

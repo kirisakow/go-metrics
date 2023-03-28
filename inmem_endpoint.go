@@ -20,7 +20,7 @@ type MetricsSummary struct {
 type GaugeValue struct {
 	Name  string
 	Hash  string `json:"-"`
-	Value float32
+	Value float64
 
 	Labels        []Label           `json:"-"`
 	DisplayLabels map[string]string `json:"Labels"`

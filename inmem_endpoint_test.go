@@ -40,13 +40,13 @@ func TestDisplayMetrics(t *testing.T) {
 			{
 				Name:          "foo.bar",
 				Hash:          "foo.bar",
-				Value:         float32(42),
+				Value:         float64(42),
 				DisplayLabels: map[string]string{},
 			},
 			{
 				Name:          "foo.bar",
 				Hash:          "foo.bar;a=b",
-				Value:         float32(23),
+				Value:         float64(23),
 				DisplayLabels: map[string]string{"a": "b"},
 			},
 		},
@@ -140,7 +140,7 @@ func TestDisplayMetrics(t *testing.T) {
 func TestDisplayMetrics_RaceSetGauge(t *testing.T) {
 	interval := 200 * time.Millisecond
 	inm := NewInmemSink(interval, 10*interval)
-	result := make(chan float32)
+	result := make(chan float64)
 
 	go func() {
 		for {
@@ -168,13 +168,13 @@ func TestDisplayMetrics_RaceSetGauge(t *testing.T) {
 	}()
 
 	got := <-result
-	verify.Values(t, "all", got, float32(42))
+	verify.Values(t, "all", got, float64(42))
 }
 
 func TestDisplayMetrics_RaceAddSample(t *testing.T) {
 	interval := 200 * time.Millisecond
 	inm := NewInmemSink(interval, 10*interval)
-	result := make(chan float32)
+	result := make(chan float64)
 
 	go func() {
 		for {
@@ -202,13 +202,13 @@ func TestDisplayMetrics_RaceAddSample(t *testing.T) {
 	}()
 
 	got := <-result
-	verify.Values(t, "all", got, float32(0.0))
+	verify.Values(t, "all", got, 0.0)
 }
 
 func TestDisplayMetrics_RaceIncrCounter(t *testing.T) {
 	interval := 200 * time.Millisecond
 	inm := NewInmemSink(interval, 10*interval)
-	result := make(chan float32)
+	result := make(chan float64)
 
 	go func() {
 		for {
@@ -236,14 +236,14 @@ func TestDisplayMetrics_RaceIncrCounter(t *testing.T) {
 	}()
 
 	got := <-result
-	verify.Values(t, "all", got, float32(0.0))
+	verify.Values(t, "all", got, 0.0)
 }
 
 func TestDisplayMetrics_RaceMetricsSetGauge(t *testing.T) {
 	interval := 200 * time.Millisecond
 	inm := NewInmemSink(interval, 10*interval)
 	met := &Metrics{Config: Config{FilterDefault: true}, sink: inm}
-	result := make(chan float32)
+	result := make(chan float64)
 	labels := []Label{
 		{"name1", "value1"},
 		{"name2", "value2"},
@@ -275,7 +275,7 @@ func TestDisplayMetrics_RaceMetricsSetGauge(t *testing.T) {
 	}()
 
 	got := <-result
-	verify.Values(t, "all", got, float32(42))
+	verify.Values(t, "all", got, float64(42))
 }
 
 func TestInmemSink_Stream(t *testing.T) {
@@ -311,7 +311,7 @@ func TestInmemSink_Stream(t *testing.T) {
 	<-chDone
 
 	decoder := json.NewDecoder(resp.Body)
-	var prevGaugeValue float32
+	var prevGaugeValue float64
 	for i := 0; i < 8; i++ {
 		var summary MetricsSummary
 		if err := decoder.Decode(&summary); err != nil {

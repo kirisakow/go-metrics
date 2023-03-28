@@ -12,7 +12,7 @@ type MockSink struct {
 
 	shutdown bool
 	keys     [][]string
-	vals     []float32
+	vals     []float64
 	labels   [][]Label
 }
 
@@ -31,6 +31,17 @@ func (m *MockSink) SetGaugeWithLabels(key []string, val float32, labels []Label)
 	defer m.lock.Unlock()
 
 	m.keys = append(m.keys, key)
+	m.vals = append(m.vals, float64(val))
+	m.labels = append(m.labels, labels)
+}
+func (m *MockSink) SetGaugeFloat64(key []string, val float64) {
+	m.SetGaugeFloat64WithLabels(key, val, nil)
+}
+func (m *MockSink) SetGaugeFloat64WithLabels(key []string, val float64, labels []Label) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	m.keys = append(m.keys, key)
 	m.vals = append(m.vals, val)
 	m.labels = append(m.labels, labels)
 }
@@ -39,7 +50,7 @@ func (m *MockSink) EmitKey(key []string, val float32) {
 	defer m.lock.Unlock()
 
 	m.keys = append(m.keys, key)
-	m.vals = append(m.vals, val)
+	m.vals = append(m.vals, float64(val))
 	m.labels = append(m.labels, nil)
 }
 func (m *MockSink) IncrCounter(key []string, val float32) {
@@ -50,7 +61,7 @@ func (m *MockSink) IncrCounterWithLabels(key []string, val float32, labels []Lab
 	defer m.lock.Unlock()
 
 	m.keys = append(m.keys, key)
-	m.vals = append(m.vals, val)
+	m.vals = append(m.vals, float64(val))
 	m.labels = append(m.labels, labels)
 }
 func (m *MockSink) AddSample(key []string, val float32) {
@@ -61,7 +72,7 @@ func (m *MockSink) AddSampleWithLabels(key []string, val float32, labels []Label
 	defer m.lock.Unlock()
 
 	m.keys = append(m.keys, key)
-	m.vals = append(m.vals, val)
+	m.vals = append(m.vals, float64(val))
 	m.labels = append(m.labels, labels)
 }
 func (m *MockSink) Shutdown() {
@@ -86,10 +97,10 @@ func TestFanoutSink_Gauge(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 }
@@ -110,10 +121,10 @@ func TestFanoutSink_Gauge_Labels(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 	if !reflect.DeepEqual(m1.labels[0], l) {
@@ -139,10 +150,10 @@ func TestFanoutSink_Key(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 }
@@ -162,10 +173,10 @@ func TestFanoutSink_Counter(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 }
@@ -186,10 +197,10 @@ func TestFanoutSink_Counter_Labels(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 	if !reflect.DeepEqual(m1.labels[0], l) {
@@ -215,10 +226,10 @@ func TestFanoutSink_Sample(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 }
@@ -239,10 +250,10 @@ func TestFanoutSink_Sample_Labels(t *testing.T) {
 	if !reflect.DeepEqual(m2.keys[0], k) {
 		t.Fatalf("key not equal")
 	}
-	if !reflect.DeepEqual(m1.vals[0], v) {
+	if !reflect.DeepEqual(m1.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
-	if !reflect.DeepEqual(m2.vals[0], v) {
+	if !reflect.DeepEqual(m2.vals[0], float64(v)) {
 		t.Fatalf("val not equal")
 	}
 	if !reflect.DeepEqual(m1.labels[0], l) {

@@ -22,11 +22,11 @@ type Config cgm.Config
 // NewCirconusSink - create new metric sink for circonus
 //
 // one of the following must be supplied:
-//    - API Token - search for an existing check or create a new check
-//    - API Token + Check Id - the check identified by check id will be used
-//    - API Token + Check Submission URL - the check identified by the submission url will be used
-//    - Check Submission URL - the check identified by the submission url will be used
-//      metric management will be *disabled*
+//   - API Token - search for an existing check or create a new check
+//   - API Token + Check Id - the check identified by check id will be used
+//   - API Token + Check Submission URL - the check identified by the submission url will be used
+//   - Check Submission URL - the check identified by the submission url will be used
+//     metric management will be *disabled*
 //
 // Note: If submission url is supplied w/o an api token, the public circonus ca cert will be used
 // to verify the broker for metrics submission.
@@ -64,6 +64,18 @@ func (s *CirconusSink) SetGauge(key []string, val float32) {
 
 // SetGaugeWithLabels sets value for a gauge metric with the given labels
 func (s *CirconusSink) SetGaugeWithLabels(key []string, val float32, labels []metrics.Label) {
+	flatKey := s.flattenKeyLabels(key, labels)
+	s.metrics.SetGauge(flatKey, int64(val))
+}
+
+// SetGauge sets value for a gauge metric
+func (s *CirconusSink) SetGaugeFloat64(key []string, val float64) {
+	flatKey := s.flattenKey(key)
+	s.metrics.SetGauge(flatKey, int64(val))
+}
+
+// SetGaugeWithLabels sets value for a gauge metric with the given labels
+func (s *CirconusSink) SetGaugeFloat64WithLabels(key []string, val float64, labels []metrics.Label) {
 	flatKey := s.flattenKeyLabels(key, labels)
 	s.metrics.SetGauge(flatKey, int64(val))
 }
